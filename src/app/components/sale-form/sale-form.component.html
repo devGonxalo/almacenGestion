@@ -1,0 +1,90 @@
+<form [formGroup]="saleForm" (ngSubmit)="onSubmit()">
+  <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+
+  <!-- Selección de Cliente y Estado de Pago -->
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <label for="saleCustomer" class="form-label">Cliente <span class="text-danger">*</span></label>
+      <div *ngIf="isLoadingCustomers" class="text-muted">Cargando clientes...</div>
+      <select id="saleCustomer" class="form-select" formControlName="customerId"
+              [ngClass]="{ 'is-invalid': saleForm.get('customerId')?.invalid && saleForm.get('customerId')?.touched }">
+        <option [ngValue]="null" disabled>Seleccione un cliente...</option>
+        <option *ngFor="let cust of customers" [ngValue]="cust.id">
+          {{ cust.name }} {{ cust.lastName }}
+        </option>
+      </select>
+      <div *ngIf="saleForm.get('customerId')?.invalid && saleForm.get('customerId')?.touched" class="invalid-feedback">
+        Debe seleccionar un cliente.
+      </div>
+    </div>
+    <div class="col-md-6 align-self-center">
+      <div class="form-check form-switch mt-4">
+        <input class="form-check-input" type="checkbox" id="isPaid" formControlName="isPaid">
+        <label class="form-check-label" for="isPaid">¿Venta Pagada?</label>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+  <h5>Ítems de la Venta</h5>
+
+  <!-- Contenedor para los ítems (FormArray) -->
+  <div formArrayName="items">
+    <div *ngFor="let itemCtrl of itemsFormArray.controls; let i = index" [formGroupName]="i" class="row align-items-center mb-3 p-2 border rounded">
+      <div class="col-md-5">
+        <label for="product-{{i}}" class="form-label">Producto <span class="text-danger">*</span></label>
+        <select id="product-{{i}}" class="form-select form-select-sm" formControlName="productId"
+                [ngClass]="{ 'is-invalid': itemCtrl.get('productId')?.invalid && itemCtrl.get('productId')?.touched }">
+          <option [ngValue]="null" disabled>Seleccione producto...</option>
+          <!-- Mostrar el producto actual seleccionado para este item -->
+          <option *ngIf="getProductById(itemCtrl.get('productId')?.value)" 
+                  [ngValue]="getProductById(itemCtrl.get('productId')?.value)?.id">
+            {{ getProductById(itemCtrl.get('productId')?.value)?.name }} ({{ getProductById(itemCtrl.get('productId')?.value)?.salePrice | currency }})
+          </option>
+          <!-- Mostrar otros productos disponibles -->
+          <option *ngFor="let prod of getAvailableProductsForItem(i)" [ngValue]="prod.id">
+            {{ prod.name }} ({{ prod.salePrice | currency }})
+          </option>
+        </select>
+        <div *ngIf="itemCtrl.get('productId')?.invalid && itemCtrl.get('productId')?.touched" class="invalid-feedback d-block">
+          Producto requerido.
+        </div>
+      </div>
+      <div class="col-md-2">
+        <label for="quantity-{{i}}" class="form-label">Cantidad <span class="text-danger">*</span></label>
+        <input type="number" id="quantity-{{i}}" class="form-control form-control-sm" formControlName="quantity" min="1"
+               [ngClass]="{ 'is-invalid': itemCtrl.get('quantity')?.invalid && itemCtrl.get('quantity')?.touched }">
+        <div *ngIf="itemCtrl.get('quantity')?.invalid && itemCtrl.get('quantity')?.touched" class="invalid-feedback d-block">
+          <div *ngIf="itemCtrl.get('quantity')?.errors?.['required']">Req.</div>
+          <div *ngIf="itemCtrl.get('quantity')?.errors?.['min']">Min 1.</div>
+        </div>
+      </div>
+      <div class="col-md-3 text-end">
+            <label class="form-label d-block"> </label>
+            <!-- Llama directamente, el método en .ts hace el casting -->
+            <strong>{{ getItemSubtotal(itemCtrl) | currency }}</strong>
+      </div>
+      <div class="col-md-2 text-end">
+         <label class="form-label d-block"> </label>
+        <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeItem(i)" title="Eliminar ítem">
+          <i class="bi bi-trash"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <button type="button" class="btn btn-info btn-sm mb-3" (click)="addItem()" [disabled]="isLoadingProducts || products.length === 0">
+    <i class="bi bi-plus-lg"></i> Añadir Producto
+  </button>
+  <div *ngIf="itemsFormArray.length === 0 && (saleForm.touched || saleForm.dirty)" class="text-danger mb-2">
+    Debe añadir al menos un producto a la venta.
+  </div>
+
+
+  <hr>
+  <div class="d-flex justify-content-end align-items-center">
+    <h4>Total Venta: <strong class="text-success">{{ calculateGrandTotal() | currency }}</strong></h4>
+  </div>
+
+  <!-- Los botones de submit/cancel estarán en el modal que usa este formulario -->
+</form>

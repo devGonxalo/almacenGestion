@@ -1,0 +1,48 @@
+<form [formGroup]="customerForm" (ngSubmit)="onSubmit()">
+  <input type="hidden" formControlName="id">
+
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label for="custName" class="form-label">Nombre <span class="text-danger">*</span></label>
+      <input type="text" id="custName" class="form-control" formControlName="name"
+             [ngClass]="{ 'is-invalid': name?.invalid && (name?.dirty || name?.touched) }">
+      <div *ngIf="name?.invalid && (name?.dirty || name?.touched)" class="invalid-feedback">
+        <div *ngIf="name?.errors?.['required']">El nombre es obligatorio.</div>
+        <div *ngIf="name?.errors?.['maxlength']">Máximo 100 caracteres.</div>
+      </div>
+    </div>
+    <div class="col-md-6 mb-3">
+      <label for="custLastName" class="form-label">Apellido <span class="text-danger">*</span></label>
+      <input type="text" id="custLastName" class="form-control" formControlName="lastName"
+             [ngClass]="{ 'is-invalid': lastName?.invalid && (lastName?.dirty || lastName?.touched) }">
+      <div *ngIf="lastName?.invalid && (lastName?.dirty || lastName?.touched)" class="invalid-feedback">
+        <div *ngIf="lastName?.errors?.['required']">El apellido es obligatorio.</div>
+        <div *ngIf="lastName?.errors?.['maxlength']">Máximo 100 caracteres.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label for="custEmail" class="form-label">Email</label>
+    <input type="email" id="custEmail" class="form-control" formControlName="email"
+           [ngClass]="{ 'is-invalid': email?.invalid && (email?.dirty || email?.touched) }">
+    <div *ngIf="email?.invalid && (email?.dirty || email?.touched)" class="invalid-feedback">
+      <div *ngIf="email?.errors?.['email']">Formato de email inválido.</div>
+      <div *ngIf="email?.errors?.['maxlength']">Máximo 100 caracteres.</div>
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label for="custPhone" class="form-label">Teléfono</label>
+    <input type="tel" id="custPhone" class="form-control" formControlName="phone">
+    <!-- Añadir validación de maxlength si es necesario -->
+  </div>
+
+  <div class="mb-3">
+    <label for="custAddress" class="form-label">Dirección</label>
+    <textarea id="custAddress" class="form-control" formControlName="address" rows="3"></textarea>
+    <!-- Añadir validación de maxlength si es necesario -->
+  </div>
+
+  <!-- Los botones de submit/cancel estarán en el modal que usa este formulario -->
+</form>

@@ -1,0 +1,59 @@
+<form [formGroup]="productForm" (ngSubmit)="onSubmit()">
+  <!-- Campo Oculto para ID si estás editando -->
+  <input type="hidden" formControlName="id">
+
+  <div class="mb-3">
+    <label for="name" class="form-label">Nombre <span class="text-danger">*</span></label>
+    <input type="text" id="name" class="form-control" formControlName="name"
+           [ngClass]="{ 'is-invalid': name?.invalid && (name?.dirty || name?.touched) }">
+    <div *ngIf="name?.invalid && (name?.dirty || name?.touched)" class="invalid-feedback">
+      <div *ngIf="name?.errors?.['required']">El nombre es obligatorio.</div>
+      <div *ngIf="name?.errors?.['maxlength']">El nombre no puede exceder los 100 caracteres.</div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label for="brand" class="form-label">Marca</label>
+      <input type="text" id="brand" class="form-control" formControlName="brand">
+    </div>
+    <div class="col-md-6 mb-3">
+      <label for="category" class="form-label">Categoría</label>
+      <input type="text" id="category" class="form-control" formControlName="category">
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label for="description" class="form-label">Descripción</label>
+    <textarea id="description" class="form-control" formControlName="description" rows="3"></textarea>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label for="purchasePrice" class="form-label">Precio de Compra <span class="text-danger">*</span></label>
+      <input type="number" id="purchasePrice" class="form-control" formControlName="purchasePrice" step="0.01"
+             [ngClass]="{ 'is-invalid': purchasePrice?.invalid && (purchasePrice?.dirty || purchasePrice?.touched) }">
+      <div *ngIf="purchasePrice?.invalid && (purchasePrice?.dirty || purchasePrice?.touched)" class="invalid-feedback">
+        <div *ngIf="purchasePrice?.errors?.['required']">El precio de compra es obligatorio.</div>
+        <div *ngIf="purchasePrice?.errors?.['min']">El precio de compra debe ser positivo.</div>
+      </div>
+    </div>
+    <div class="col-md-6 mb-3">
+      <label for="profitPercentage" class="form-label">Porcentaje Ganancia (ej: 0.20 para 20%) <span class="text-danger">*</span></label>
+      <input type="number" id="profitPercentage" class="form-control" formControlName="profitPercentage" step="0.01"
+             [ngClass]="{ 'is-invalid': profitPercentage?.invalid && (profitPercentage?.dirty || profitPercentage?.touched) }">
+      <div *ngIf="profitPercentage?.invalid && (profitPercentage?.dirty || profitPercentage?.touched)" class="invalid-feedback">
+        <div *ngIf="profitPercentage?.errors?.['required']">El porcentaje de ganancia es obligatorio.</div>
+        <div *ngIf="profitPercentage?.errors?.['min']">El porcentaje no puede ser negativo.</div>
+        <div *ngIf="profitPercentage?.errors?.['max']">El porcentaje no puede ser mayor a 1 (100%).</div>
+      </div>
+    </div>
+  </div>
+    <div class="mt-4 d-flex justify-content-end">
+    <button type="button" class="btn btn-outline-secondary me-2" (click)="onCancel()">Cancelar</button>
+    <button type="submit" class="btn btn-primary" [disabled]="productForm.invalid">
+      {{ productData && productData.id ? 'Guardar Cambios' : 'Crear Producto' }}
+    </button>
+  </div>
+  <!-- Botones se manejan en el modal que contiene este formulario -->
+</form>

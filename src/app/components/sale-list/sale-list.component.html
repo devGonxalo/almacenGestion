@@ -1,0 +1,88 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1><i class="bi bi-cart-check-fill"></i> Ventas</h1>
+    <button class="btn btn-success" (click)="openNewSaleModal(newSaleModalContent)">
+      <i class="bi bi-cart-plus-fill"></i> Nueva Venta
+    </button>
+  </div>
+
+  <div *ngIf="isLoading && sales.length === 0" class="text-center">
+    <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div>
+    <p>Cargando ventas...</p>
+  </div>
+
+  <div *ngIf="errorMessage && !isLoading" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && !errorMessage && sales.length === 0" class="alert alert-info">
+    No hay ventas registradas.
+  </div>
+
+  <div *ngIf="!isLoading && !errorMessage && sales.length > 0" class="accordion" id="salesAccordion">
+    <div *ngFor="let sale of sales; let i = index" class="accordion-item">
+      <h2 class="accordion-header" [id]="'heading-' + sale.id">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                [attr.data-bs-target]="'#collapse-' + sale.id" [attr.aria-expanded]="i === 0"
+                [attr.aria-controls]="'collapse-' + sale.id" [class.collapsed]="i !== 0">
+          Venta #{{ sale.id }} - {{ sale.saleDate | date:'dd/MM/yyyy HH:mm' }}
+          <span class="mx-2">-</span>
+          Cliente: {{ sale.customer?.name }} {{ sale.customer?.lastName }}
+          <span class="mx-2">-</span>
+          Total: <strong class="text-success">{{ sale.totalAmount | currency }}</strong>
+          <span class="ms-auto badge {{ sale.isPaid ? 'bg-success' : 'bg-warning text-dark' }}">
+            {{ sale.isPaid ? 'Pagada' : 'A Cuenta' }}
+          </span>
+        </button>
+      </h2>
+      <div [id]="'collapse-' + sale.id" class="accordion-collapse collapse" [class.show]="i === 0"
+           [attr.aria-labelledby]="'heading-' + sale.id" data-bs-parent="#salesAccordion">
+        <div class="accordion-body">
+          <h6>Detalles de la Venta:</h6>
+          <ul *ngIf="sale.saleItems && sale.saleItems.length > 0" class="list-group list-group-flush">
+            <li *ngFor="let item of sale.saleItems" class="list-group-item d-flex justify-content-between align-items-center">
+              <span>
+                {{ item.quantity }} x {{ item.product?.name || ('Producto ID: ' + item.productId) }}
+                <em>({{ item.unitPrice | currency }} c/u)</em>
+              </span>
+              <strong>{{ (item.quantity * item.unitPrice) | currency }}</strong>
+            </li>
+          </ul>
+          <p *ngIf="!sale.saleItems || sale.saleItems.length === 0">No hay ítems detallados para esta venta.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para Nueva Venta -->
+<ng-template #newSaleModalContent let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-new-sale-title">Registrar Nueva Venta</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <app-sale-form (formSubmit)="onSaleFormSubmit($event)"
+                   (formCancel)="modal.dismiss('Cancel click')">
+    </app-sale-form>
+     <div *ngIf="isLoading" class="text-center my-2"> <!-- Spinner para la acción del modal -->
+        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+        <span>Procesando venta...</span>
+    </div>
+    <div *ngIf="modalErrorMessage && !isLoading" class="alert alert-danger mt-2">
+        {{ modalErrorMessage }}
+    </div>
+  </div>
+  <!-- Los botones de acción están implícitos por los eventos del app-sale-form,
+       pero podrías añadir un pie de modal si prefieres botones explícitos aquí. -->
+   <div class="modal-footer">
+    <button type="button" class="btn btn-outline-secondary" (click)="modal.dismiss('cancel click')">Cancelar</button>
+    <!-- Este botón podría ser redundante si el app-sale-form tiene su propio submit,
+         o puedes usarlo para disparar el submit del form hijo.
+         Para este ejemplo, asumimos que app-sale-form tiene su propio botón submit implícito o explícito.
+         Si no lo tiene, necesitarías un @ViewChild(SaleFormComponent) y un método para llamar a su onSubmit.
+    -->
+    <button type="button" class="btn btn-primary" (click)="triggerSaleFormSubmit()">Registrar Venta</button>
+    <!-- <button type="button" class="btn btn-primary" (click)="triggerSaleFormSubmit()">Registrar Venta</button> -->
+  </div>
+</ng-template>
